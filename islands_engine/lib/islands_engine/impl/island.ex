@@ -6,7 +6,7 @@ defmodule IslandsEngine.Impl.Island do
   @enforce_keys [:coordinates, :hit_coordinates]
   defstruct [:coordinates, :hit_coordinates]
 
-  def new(%Coordinate{} = island_position, shape) do
+  def new(shape, %Coordinate{} = island_position) when is_atom(shape) do
     with [_ | _] = offsets <- island_offsets(shape),
          %MapSet{} = coordinates <- island_coordinates(offsets, island_position) do
       %Island{coordinates: coordinates, hit_coordinates: MapSet.new()}
