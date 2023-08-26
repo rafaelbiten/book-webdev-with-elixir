@@ -2,16 +2,17 @@ defmodule IslandsEngine.Impl.Island do
   @moduledoc false
   alias __MODULE__
   alias IslandsEngine.Impl.Coordinate
-  alias IslandsEngine.Impl.Guesses
 
   @enforce_keys [:coordinates, :hit_coordinates]
   defstruct [:coordinates, :hit_coordinates]
 
   def new(%Coordinate{} = island_position, shape) do
-    %Island{
-      coordinates: island_coordinates(island_offsets(shape), island_position),
-      hit_coordinates: MapSet.new()
-    }
+    with [_ | _] = offsets <- island_offsets(shape),
+         %MapSet{} = coordinates <- island_coordinates(offsets, island_position) do
+      %Island{coordinates: coordinates, hit_coordinates: MapSet.new()}
+    else
+      error -> error
+    end
   end
 
   defp island_coordinates(island_offsets, %Coordinate{} = island_position) do
@@ -23,7 +24,7 @@ defmodule IslandsEngine.Impl.Island do
   defp add_coordinate(coordinates, {col_offset, row_offset}, %Coordinate{col: col, row: row} = _island_position) do
     case Coordinate.new(col: col_offset + col, row: row_offset + row) do
       {:ok, coordinate} -> {:cont, MapSet.put(coordinates, coordinate)}
-      {:error, error} -> {:halt, error}
+      error -> {:halt, error}
     end
   end
 
