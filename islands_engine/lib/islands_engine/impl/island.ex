@@ -15,8 +15,20 @@ defmodule IslandsEngine.Impl.Island do
     end
   end
 
+  def guess(%Island{} = island, %Coordinate{} = coordinate) do
+    if MapSet.member?(island.coordinates, coordinate) do
+      {:hit, update_in(island.hit_coordinates, &MapSet.put(&1, coordinate))}
+    else
+      {:miss, island}
+    end
+  end
+
   def overlaps?(%Island{} = island1, %Island{} = island2) do
     not MapSet.disjoint?(island1.coordinates, island2.coordinates)
+  end
+
+  def forested?(%Island{} = island) do
+    MapSet.equal?(island.coordinates, island.hit_coordinates)
   end
 
   defp island_coordinates(island_offsets, %Coordinate{} = island_position) do
