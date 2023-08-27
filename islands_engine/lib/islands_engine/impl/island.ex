@@ -31,6 +31,10 @@ defmodule IslandsEngine.Impl.Island do
     MapSet.equal?(island.coordinates, island.hit_coordinates)
   end
 
+  def shapes, do: [:dot, :square, :l_shape, :s_shape, :z_shape]
+
+  # implemnetation details
+
   defp island_coordinates(island_offsets, %Coordinate{} = island_position) do
     Enum.reduce_while(island_offsets, MapSet.new(), fn offset, coordinates ->
       add_coordinate(coordinates, offset, island_position)
