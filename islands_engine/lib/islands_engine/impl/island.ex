@@ -15,6 +15,10 @@ defmodule IslandsEngine.Impl.Island do
     end
   end
 
+  def overlaps?(%Island{} = island1, %Island{} = island2) do
+    not MapSet.disjoint?(island1.coordinates, island2.coordinates)
+  end
+
   defp island_coordinates(island_offsets, %Coordinate{} = island_position) do
     Enum.reduce_while(island_offsets, MapSet.new(), fn offset, coordinates ->
       add_coordinate(coordinates, offset, island_position)
