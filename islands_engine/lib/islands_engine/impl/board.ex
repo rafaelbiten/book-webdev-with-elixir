@@ -7,6 +7,14 @@ defmodule IslandsEngine.Impl.Board do
     %{}
   end
 
+  def position_island(board, key, %Island{} = island) do
+    if overlaps_existing_island?(board, key, island) do
+      {:error, :overlapping_island}
+    else
+      {:ok, Map.put(board, key, island)}
+    end
+  end
+
   def all_islands_positioned?(board) do
     Enum.all?(Island.shapes(), fn shape -> Map.has_key?(board, shape) end)
   end
@@ -29,14 +37,6 @@ defmodule IslandsEngine.Impl.Board do
        won: Enum.all?(updated_board, fn {_key, island} -> Island.forested?(island) end)}
     else
       {:hit, updated_board, forested: nil, won: false}
-    end
-  end
-
-  def position_island(board, key, %Island{} = island) do
-    if overlaps_existing_island?(board, key, island) do
-      {:error, :overlapping_island}
-    else
-      {:ok, Map.put(board, key, island)}
     end
   end
 

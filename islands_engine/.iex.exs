@@ -1,4 +1,4 @@
-alias IslandsEngine.Impl.{Coordinate, Guesses, Island}
+alias IslandsEngine.Impl.{Board, Coordinate, Guesses, Island}
 
 {:ok, coord1} = Coordinate.new(col: 1, row: 1)
 {:ok, coord2} = Coordinate.new(col: 2, row: 2)
@@ -21,3 +21,14 @@ Island.guess(island_dot, coord1)
 |> IO.inspect(label: "island_dot is forested now?")
 
 guesses = Guesses.new()
+
+game = Board.new()
+|> tap(&IO.inspect(&1, label: "New board"))
+|> Board.position_island(:island_dot, island_dot)
+|> tap(&IO.inspect(&1, label: "Positioned island_dot"))
+# |> then(fn {:ok, board} -> Board.position_island(board, :island_z, island_z) end)
+# |> tap(&IO.inspect(&1, label: "Positioned island_z"))
+|> then(fn {:ok, board} -> Board.guess(board, coord1) end)
+|> tap(&IO.inspect(&1, label: "Guessed coord 1"))
+# |> then(fn {:ok, board} -> Board.guess(board, coord2) end)
+# |> tap(&IO.inspect(&1, label: "Guessed coord 2"))
