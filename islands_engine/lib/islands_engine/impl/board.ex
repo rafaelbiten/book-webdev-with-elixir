@@ -34,9 +34,9 @@ defmodule IslandsEngine.Impl.Board do
 
     if Island.forested?(island_hit) do
       {:hit, updated_board, forested: key,
-       won: Enum.all?(updated_board, fn {_key, island} -> Island.forested?(island) end)}
+       won?: Enum.all?(updated_board, fn {_key, island} -> Island.forested?(island) end)}
     else
-      {:hit, updated_board, forested: nil, won: false}
+      {:hit, updated_board, forested: nil, won?: false}
     end
   end
 
