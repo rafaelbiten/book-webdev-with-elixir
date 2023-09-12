@@ -1,4 +1,8 @@
+alias IslandsEngine.Game
+alias IslandsEngine.Impl.Board
+alias IslandsEngine.Impl.Coordinate
+alias IslandsEngine.Impl.Guesses
+alias IslandsEngine.Impl.Island
 alias IslandsEngine.Rules
-alias IslandsEngine.Impl.{Board, Coordinate, Guesses, Island}
 
 # IslandsEngine.Iex.InitialChecks.run()
