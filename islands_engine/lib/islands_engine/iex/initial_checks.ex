@@ -57,7 +57,7 @@ defmodule IslandsEngine.Iex.InitialChecks do
 
     Rules.new()
     |> tap(&IO.inspect(&1, label: "Rules initial state"))
-    |> then(fn rules -> Rules.check(rules, :set_player) end)
+    |> then(fn rules -> Rules.check(rules, :add_player) end)
     |> tap(&IO.inspect(&1, label: "Rules after setting players"))
     |> then(fn {:ok, rules} -> Rules.check(rules, {:position_islands, :p1}) end)
     |> then(fn {:ok, rules} -> Rules.check(rules, {:position_islands, :p2}) end)

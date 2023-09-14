@@ -21,7 +21,7 @@ defmodule IslandsEngine.Game do
 
   # 2 aliases to get the game state
   defdelegate get_state(game), to: :sys
-  defdelegate state(state), to: :sys, as: :get_state
+  defdelegate state(game), to: :sys, as: :get_state
 
   def add_player(game, name) when is_binary(name) do
     GenServer.call(game, {:add_player, name})
@@ -30,7 +30,7 @@ defmodule IslandsEngine.Game do
   # server
 
   def handle_call({:add_player, name}, _from, game_state) do
-    with {:ok, rules} <- Rules.check(game_state.rules, :set_player) do
+    with {:ok, rules} <- Rules.check(game_state.rules, :add_player) do
       game_state
       |> put_in([:player2, :name], name)
       |> put_in([:rules], rules)
