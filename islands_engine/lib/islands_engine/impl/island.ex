@@ -9,7 +9,7 @@ defmodule IslandsEngine.Impl.Island do
   def new(shape, %Coordinate{} = island_position) when is_atom(shape) do
     with [_ | _] = offsets <- island_offsets(shape),
          %MapSet{} = coordinates <- island_coordinates(offsets, island_position) do
-      %Island{coordinates: coordinates, hit_coordinates: MapSet.new()}
+      {:ok, %Island{coordinates: coordinates, hit_coordinates: MapSet.new()}}
     else
       error -> error
     end
