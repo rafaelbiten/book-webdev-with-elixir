@@ -53,7 +53,7 @@ defmodule IslandsEngine.Rules do
     end
   end
 
-  def check(_state, _action), do: :error
+  def check(_state, _action), do: {:error, :rule_violation}
 
   # implemnetation details
 
