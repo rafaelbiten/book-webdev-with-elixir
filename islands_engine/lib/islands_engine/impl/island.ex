@@ -7,7 +7,8 @@ defmodule IslandsEngine.Impl.Island do
   defstruct [:coordinates, :hit_coordinates]
 
   def new(shape, %Coordinate{} = island_position) when is_atom(shape) do
-    with [_ | _] = offsets <- island_offsets(shape),
+    with {:ok, shape} <- check_valid_island_shape(shape),
+         [_ | _] = offsets <- island_offsets(shape),
          %MapSet{} = coordinates <- island_coordinates(offsets, island_position) do
       {:ok, %Island{coordinates: coordinates, hit_coordinates: MapSet.new()}}
     else
@@ -31,9 +32,17 @@ defmodule IslandsEngine.Impl.Island do
     MapSet.equal?(island.coordinates, island.hit_coordinates)
   end
 
-  def shapes, do: [:dot, :square, :l_shape, :s_shape, :z_shape]
+  def shapes, do: Enum.take([:dot, :square, :l_shape, :s_shape, :z_shape], 2)
 
   # implemnetation details
+
+  defp check_valid_island_shape(shape) do
+    if shape in shapes() do
+      {:ok, shape}
+    else
+      {:error, :invalid_island_shape}
+    end
+  end
 
   defp island_coordinates(island_offsets, %Coordinate{} = island_position) do
     Enum.reduce_while(island_offsets, MapSet.new(), fn offset, coordinates ->
@@ -78,8 +87,6 @@ defmodule IslandsEngine.Impl.Island do
      XX
     """)
   end
-
-  defp island_offsets(_), do: {:error, :invalid_island_shape}
 
   defp island_offsets_from_shape(raw_shape) do
     raw_shape

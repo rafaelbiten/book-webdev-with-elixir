@@ -15,8 +15,12 @@ defmodule IslandsEngine.Impl.Board do
     end
   end
 
-  def all_islands_positioned?(board) do
-    Enum.all?(Island.shapes(), fn shape -> Map.has_key?(board, shape) end)
+  def check_all_islands_positioned(board) do
+    if Enum.all?(Island.shapes(), fn shape -> Map.has_key?(board, shape) end) do
+      {:ok, board}
+    else
+      {:error, :not_all_islands_positioned}
+    end
   end
 
   def guess(board, %Coordinate{} = coordinate) do
