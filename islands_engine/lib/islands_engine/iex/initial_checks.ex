@@ -67,7 +67,7 @@ defmodule IslandsEngine.Iex.InitialChecks do
     |> tap(&IO.inspect(&1, label: "Rules locks player 1 islands"))
     |> tap(fn {:ok, rules} ->
       IO.puts("🔥 Rules :error and won't let player 1 position its islands anymore")
-      :error = Rules.check(rules, {:position_island, :p1})
+      {:error, _error} = Rules.check(rules, {:position_island, :p1})
     end)
     |> then(fn {:ok, rules} -> Rules.check(rules, {:position_island, :p2}) end)
     |> tap(&IO.inspect(&1, label: "Rules still lets player 2 position its islands"))
@@ -77,7 +77,7 @@ defmodule IslandsEngine.Iex.InitialChecks do
     |> then(fn {:ok, rules} -> Rules.check(rules, {:guess_coordinate, :p2}) end)
     |> tap(fn {:ok, rules} ->
       IO.puts("🔥 Rules :error and won't let p2 play twice in a row")
-      :error = Rules.check(rules, {:guess_coordinate, :p2})
+      {:error, _error} = Rules.check(rules, {:guess_coordinate, :p2})
     end)
     |> then(fn {:ok, rules} -> Rules.check(rules, {:guess_coordinate, :p1}) end)
     |> then(fn {:ok, rules} -> Rules.check(rules, {:guess_coordinate, :p2}) end)
