@@ -31,16 +31,16 @@ defmodule IslandsEngine.Impl.Board do
 
   # implemnetation details
 
-  defp send_result(:miss, board), do: {:miss, board}
+  defp send_result(:miss, board), do: {:ok, {:miss, board}}
 
   defp send_result({key, island_hit}, board) do
     updated_board = Map.put(board, key, island_hit)
 
     if Island.forested?(island_hit) do
-      {:hit, updated_board, forested: key,
-       won?: Enum.all?(updated_board, fn {_key, island} -> Island.forested?(island) end)}
+      won? = Enum.all?(updated_board, fn {_key, island} -> Island.forested?(island) end)
+      {:ok, {:hit, updated_board, forested: key, won?: won?}}
     else
-      {:hit, updated_board, forested: nil, won?: false}
+      {:ok, {:hit, updated_board, forested: nil, won?: false}}
     end
   end
 

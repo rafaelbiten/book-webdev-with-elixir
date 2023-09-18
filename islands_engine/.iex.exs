@@ -24,3 +24,11 @@ game_state = :sys.get_state(game)
 {:error, :islands_already_set} = Game.position_island(game, :p1, :dot, 1, 1)
 
 {:error, :not_all_islands_positioned} = Game.set_islands(game, :p2)
+
+:ok = Game.position_island(game, :p2, :dot, 1, 1)
+:ok = Game.position_island(game, :p2, :square, 2, 2)
+{:error, :rule_violation} = Game.guess(game, :p1, 4, 4)
+
+{:ok, _board} = Game.set_islands(game, :p2)
+
+_result = Game.guess(game, :p1, 4, 4)

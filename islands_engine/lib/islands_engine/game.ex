@@ -39,6 +39,10 @@ defmodule IslandsEngine.Game do
     GenServer.call(game, {:set_islands, player})
   end
 
+  def guess(game, player, col, row) when player in @players do
+    GenServer.call(game, {:guess, player, col, row})
+  end
+
   # server
 
   def handle_call({:add_player, name}, _from, game_state) do
@@ -55,8 +59,8 @@ defmodule IslandsEngine.Game do
   def handle_call({:position_island, player, shape, col, row}, _from, game_state) do
     with player_board <- get_in(game_state, [player, :board]),
          {:ok, rules} <- Rules.check(game_state.rules, {:position_island, player}),
-         {:ok, island_position} <- Coordinate.new(col: col, row: row),
-         {:ok, island} <- Island.new(shape, island_position),
+         {:ok, island_coordinate} <- Coordinate.new(col: col, row: row),
+         {:ok, island} <- Island.new(shape, island_coordinate),
          {:ok, board} <- Board.position_island(player_board, shape, island) do
       game_state
       |> put_in([player, :board], board)
@@ -74,6 +78,20 @@ defmodule IslandsEngine.Game do
       game_state
       |> put_in([:rules], rules)
       |> reply({:ok, board})
+    else
+      error -> reply(game_state, error)
+    end
+  end
+
+  def handle_call({:guess, player, col, row}, _from, game_state) do
+    with player_board <- get_in(game_state, [player, :board]),
+         {:ok, rules} <- Rules.check(game_state.rules, {:guess_coordinate, player}),
+         {:ok, guess_coordinate} <- Coordinate.new(col: col, row: row),
+         {:ok, result} <- Board.guess(player_board, guess_coordinate) do
+      game_state
+      |> put_in([:rules], rules)
+      |> put_in([player, :board], elem(result, 1))
+      |> reply({:ok, result})
     else
       error -> reply(game_state, error)
     end
