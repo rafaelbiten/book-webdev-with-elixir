@@ -8,9 +8,9 @@ defmodule IslandsEngine.Impl.Guesses do
 
   def new, do: %Guesses{hits: MapSet.new(), misses: MapSet.new()}
 
-  def hit(%Guesses{} = guesses, %Coordinate{} = coordinate),
+  def guess(:hit, %Guesses{} = guesses, %Coordinate{} = coordinate),
     do: update_in(guesses.hits, fn hits -> MapSet.put(hits, coordinate) end)
 
-  def miss(%Guesses{} = guesses, %Coordinate{} = coordinate),
+  def guess(:miss, %Guesses{} = guesses, %Coordinate{} = coordinate),
     do: update_in(guesses.misses, fn misses -> MapSet.put(misses, coordinate) end)
 end

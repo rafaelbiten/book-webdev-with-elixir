@@ -37,15 +37,7 @@ defmodule IslandsEngine.Rules do
     {:ok, %Rules{rules | state: :p1_turn}}
   end
 
-  def check(%Rules{state: :p1_turn} = rules, {:win_check, won?}) do
-    if won? do
-      {:ok, %Rules{rules | state: :game_over}}
-    else
-      {:ok, rules}
-    end
-  end
-
-  def check(%Rules{state: :p2_turn} = rules, {:win_check, won?}) do
+  def check(%Rules{} = rules, {:win_check, won?}) do
     if won? do
       {:ok, %Rules{rules | state: :game_over}}
     else

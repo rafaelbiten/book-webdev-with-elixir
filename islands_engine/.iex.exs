@@ -31,4 +31,8 @@ game_state = :sys.get_state(game)
 
 {:ok, _board} = Game.set_islands(game, :p2)
 
-_result = Game.guess(game, :p1, 4, 4)
+{:ok, {:miss, nil, false}} = Game.guess(game, :p1, 4, 4)
+
+{:ok, {:hit, :dot, false}} = Game.guess(game, :p2, 1, 1)
+
+{:ok, {:hit, nil, false}} = Game.guess(game, :p1, 2, 2)

@@ -84,14 +84,17 @@ defmodule IslandsEngine.Game do
   end
 
   def handle_call({:guess, player, col, row}, _from, game_state) do
-    with player_board <- get_in(game_state, [player, :board]),
+    with opponent <- opponent(player),
+         opponent_board <- get_in(game_state, [opponent, :board]),
          {:ok, rules} <- Rules.check(game_state.rules, {:guess_coordinate, player}),
          {:ok, guess_coordinate} <- Coordinate.new(col: col, row: row),
-         {:ok, result} <- Board.guess(player_board, guess_coordinate) do
+         {:ok, hit_or_miss, opponent_board, forested_island, won?} <- Board.guess(opponent_board, guess_coordinate),
+         {:ok, rules} <- Rules.check(rules, {:win_check, won?}) do
       game_state
+      |> update_guesses(player, hit_or_miss, guess_coordinate)
+      |> put_in([opponent, :board], opponent_board)
       |> put_in([:rules], rules)
-      |> put_in([player, :board], elem(result, 1))
-      |> reply({:ok, result})
+      |> reply({:ok, {hit_or_miss, forested_island, won?}})
     else
       error -> reply(game_state, error)
     end
@@ -100,4 +103,11 @@ defmodule IslandsEngine.Game do
   # internals / implementation details
 
   defp reply(updated_game_state, reply), do: {:reply, reply, updated_game_state}
+
+  defp opponent(:p1), do: :p2
+  defp opponent(:p2), do: :p1
+
+  defp update_guesses(game_state, player, hit_or_miss, guess_coordinate) do
+    update_in(game_state, [player, :guesses], fn guesses -> Guesses.guess(hit_or_miss, guesses, guess_coordinate) end)
+  end
 end
