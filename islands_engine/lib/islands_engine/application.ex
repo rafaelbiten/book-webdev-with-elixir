@@ -10,6 +10,7 @@ defmodule IslandsEngine.Application do
     children = [
       # Starts a worker by calling: IslandsEngine.Worker.start_link(arg)
       # {IslandsEngine.Worker, arg}
+      {DynamicSupervisor, name: IslandsEngine.GameSupervisor, strategy: :one_for_one},
       {Registry, keys: :unique, name: Registry.Game}
     ]
 

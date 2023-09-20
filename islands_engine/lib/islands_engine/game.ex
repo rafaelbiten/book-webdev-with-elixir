@@ -1,6 +1,7 @@
 defmodule IslandsEngine.Game do
   @moduledoc false
   use GenServer
+  # , start: {__MODULE__, :start_link, []}, restart: :transient
 
   alias IslandsEngine.Impl.Board
   alias IslandsEngine.Impl.Coordinate
@@ -11,6 +12,13 @@ defmodule IslandsEngine.Game do
   @players [:p1, :p2]
 
   # client
+
+  def start_game(player_one_name) do
+    DynamicSupervisor.start_child(
+      IslandsEngine.DynamicSupervisor,
+      {__MODULE__, player_one_name}
+    )
+  end
 
   def start_link(name) when is_binary(name) do
     GenServer.start_link(__MODULE__, name, name: via_tuple(name))
