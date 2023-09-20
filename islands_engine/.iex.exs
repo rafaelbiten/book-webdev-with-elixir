@@ -1,4 +1,5 @@
 alias IslandsEngine.Game
+alias IslandsEngine.Iex.Processes
 alias IslandsEngine.Impl.Board
 alias IslandsEngine.Impl.Coordinate
 alias IslandsEngine.Impl.Guesses
@@ -6,6 +7,8 @@ alias IslandsEngine.Impl.Island
 alias IslandsEngine.Rules
 
 # IslandsEngine.Iex.InitialChecks.run()
+# game = IslandsEngine.Iex.GameChecks.run()
+# loop = Processes.run()
 
 {:ok, game} = Game.start_link("Raf")
 game_state = :sys.get_state(game)
