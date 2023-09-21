@@ -1,6 +1,6 @@
 defmodule IslandsEngine.Game do
   @moduledoc false
-  use GenServer
+  use GenServer, restart: :transient
 
   alias IslandsEngine.Impl.Board
   alias IslandsEngine.Impl.Coordinate
@@ -9,6 +9,7 @@ defmodule IslandsEngine.Game do
   alias IslandsEngine.Rules
 
   @players [:p1, :p2]
+  @timeout :timer.minutes(30)
 
   # client
 
@@ -27,7 +28,7 @@ defmodule IslandsEngine.Game do
     player1 = %{name: name, board: Board.new(), guesses: Guesses.new()}
     player2 = %{name: nil, board: Board.new(), guesses: Guesses.new()}
     new_game = %{p1: player1, p2: player2, rules: %Rules{}}
-    {:ok, new_game}
+    {:ok, new_game, @timeout}
   end
 
   def via_tuple(name), do: {:via, Registry, {Registry.Game, name}}
@@ -109,9 +110,13 @@ defmodule IslandsEngine.Game do
     end
   end
 
+  def handle_info(:timeout, game_state) do
+    {:stop, {:shutdown, :timeout}, game_state}
+  end
+
   # internals / implementation details
 
-  defp reply(updated_game_state, reply), do: {:reply, reply, updated_game_state}
+  defp reply(updated_game_state, reply), do: {:reply, reply, updated_game_state, @timeout}
 
   defp opponent(:p1), do: :p2
   defp opponent(:p2), do: :p1
