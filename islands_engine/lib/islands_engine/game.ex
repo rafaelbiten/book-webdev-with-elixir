@@ -1,7 +1,6 @@
 defmodule IslandsEngine.Game do
   @moduledoc false
   use GenServer
-  # , start: {__MODULE__, :start_link, []}, restart: :transient
 
   alias IslandsEngine.Impl.Board
   alias IslandsEngine.Impl.Coordinate
@@ -30,6 +29,8 @@ defmodule IslandsEngine.Game do
     new_game = %{p1: player1, p2: player2, rules: %Rules{}}
     {:ok, new_game}
   end
+
+  def via_tuple(name), do: {:via, Registry, {Registry.Game, name}}
 
   # 2 aliases to get the game state
   defdelegate get_state(game), to: :sys
@@ -109,8 +110,6 @@ defmodule IslandsEngine.Game do
   end
 
   # internals / implementation details
-
-  defp via_tuple(name), do: {:via, Registry, {Registry.Game, name}}
 
   defp reply(updated_game_state, reply), do: {:reply, reply, updated_game_state}
 
