@@ -10,8 +10,9 @@ defmodule IslandsEngine.Application do
     children = [
       # Starts a worker by calling: IslandsEngine.Worker.start_link(arg)
       # {IslandsEngine.Worker, arg}
+      {IslandsEngine.GameCache, name: IslandsEngine.GameCache},
       {DynamicSupervisor, name: IslandsEngine.GameSupervisor, strategy: :one_for_one},
-      {Registry, keys: :unique, name: Registry.Game}
+      {Registry, name: Registry.Game, keys: :unique}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

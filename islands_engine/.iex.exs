@@ -1,4 +1,5 @@
 alias IslandsEngine.Game
+alias IslandsEngine.GameCache
 alias IslandsEngine.GameSupervisor
 alias IslandsEngine.Impl.Board
 alias IslandsEngine.Impl.Coordinate

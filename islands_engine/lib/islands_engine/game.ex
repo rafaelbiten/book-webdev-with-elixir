@@ -2,6 +2,7 @@ defmodule IslandsEngine.Game do
   @moduledoc false
   use GenServer, restart: :transient
 
+  alias IslandsEngine.GameCache
   alias IslandsEngine.Impl.Board
   alias IslandsEngine.Impl.Coordinate
   alias IslandsEngine.Impl.Guesses
@@ -9,7 +10,7 @@ defmodule IslandsEngine.Game do
   alias IslandsEngine.Rules
 
   @players [:p1, :p2]
-  @timeout :timer.minutes(30)
+  @timeout :timer.minutes(5)
 
   # client
 
@@ -22,13 +23,6 @@ defmodule IslandsEngine.Game do
 
   def start_link(name) when is_binary(name) do
     GenServer.start_link(__MODULE__, name, name: via_tuple(name))
-  end
-
-  def init(name) do
-    player1 = %{name: name, board: Board.new(), guesses: Guesses.new()}
-    player2 = %{name: nil, board: Board.new(), guesses: Guesses.new()}
-    new_game = %{p1: player1, p2: player2, rules: %Rules{}}
-    {:ok, new_game, @timeout}
   end
 
   def via_tuple(name), do: {:via, Registry, {Registry.Game, name}}
@@ -54,6 +48,20 @@ defmodule IslandsEngine.Game do
   end
 
   # server
+
+  def init(name) do
+    case GameCache.restore_game(name) do
+      nil ->
+        player1 = %{name: name, board: Board.new(), guesses: Guesses.new()}
+        player2 = %{name: nil, board: Board.new(), guesses: Guesses.new()}
+        new_game_state = %{p1: player1, p2: player2, rules: %Rules{}}
+        GameCache.store_game(new_game_state.p1.name, new_game_state)
+        {:ok, new_game_state, @timeout}
+
+      game_state ->
+        {:ok, game_state, @timeout}
+    end
+  end
 
   def handle_call({:add_player, name}, _from, game_state) do
     with {:ok, rules} <- Rules.check(game_state.rules, :add_player) do
@@ -111,12 +119,16 @@ defmodule IslandsEngine.Game do
   end
 
   def handle_info(:timeout, game_state) do
+    GameCache.delete_game(game_state.p1.name)
     {:stop, {:shutdown, :timeout}, game_state}
   end
 
   # internals / implementation details
 
-  defp reply(updated_game_state, reply), do: {:reply, reply, updated_game_state, @timeout}
+  defp reply(updated_game_state, reply) do
+    GameCache.store_game(updated_game_state.p1.name, updated_game_state)
+    {:reply, reply, updated_game_state, @timeout}
+  end
 
   defp opponent(:p1), do: :p2
   defp opponent(:p2), do: :p1

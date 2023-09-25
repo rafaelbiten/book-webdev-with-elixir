@@ -1,6 +1,7 @@
 defmodule IslandsEngine.GameSupervisor do
   @moduledoc false
   alias IslandsEngine.Game
+  alias IslandsEngine.GameCache
 
   def start_game(player_one_name) do
     DynamicSupervisor.start_child(__MODULE__, {Game, player_one_name})
@@ -10,8 +11,12 @@ defmodule IslandsEngine.GameSupervisor do
     player_one_name
     |> find_game_by_name()
     |> then(fn
-      nil -> {:error, :game_not_found}
-      game_pid -> DynamicSupervisor.terminate_child(__MODULE__, game_pid)
+      nil ->
+        {:error, :game_not_found}
+
+      game_pid ->
+        GameCache.delete_game(player_one_name)
+        DynamicSupervisor.terminate_child(__MODULE__, game_pid)
     end)
   end
 
