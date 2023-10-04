@@ -11,7 +11,7 @@ alias IslandsEngine.Rules
 # game = IslandsEngine.Iex.GameChecks.run()
 # loop = IslandsEngine.Iex.Processes.run()
 
-:observer.start()
+# :observer.start()
 
 GameSupervisor.start_game("Raf")
 GameSupervisor.start_game("Fau")
