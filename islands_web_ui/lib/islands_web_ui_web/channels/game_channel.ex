@@ -12,24 +12,33 @@ defmodule IslandsWebUiWeb.GameChannel do
     "game:" <> player = socket.topic
 
     case GameSupervisor.start_game(player) do
-      {:ok, _pid} -> {:reply, {:ok, player}, socket}
+      {:ok, _pid} -> {:reply, {:ok, %{player: player}}, socket}
       {:error, reason} -> {:reply, {:error, inspect(reason)}, socket}
+    end
+  end
+
+  def handle_in("add_player", player, socket) do
+    socket.topic
+    |> via()
+    |> Game.add_player(player)
+    |> case do
+      :ok ->
+        broadcast!(socket, "player_added", %{
+          player: player,
+          message: "A second player joined the game: " <> player
+        })
+
+        {:noreply, socket}
+
+      {:error, reason} ->
+        {:reply, {:error, inspect(reason)}, socket}
+
+      error ->
+        {:reply, {:error, inspect(error)}, socket}
     end
   end
 
   # --
 
-  def handle_in("reply", payload, socket) do
-    {:reply, {:ok, payload}, socket}
-  end
-
-  def handle_in("push", payload, socket) do
-    push(socket, "push", payload)
-    {:noreply, socket}
-  end
-
-  def handle_in("broadcast", payload, socket) do
-    broadcast!(socket, "broadcast", payload)
-    {:noreply, socket}
-  end
+  defp via("game:" <> player), do: GameSupervisor.find_game_by_name(player)
 end

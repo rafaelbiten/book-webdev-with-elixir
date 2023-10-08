@@ -7,11 +7,10 @@ export const gameModule = {
   channelNew,
   channelJoin,
   channelLeave,
-  startGame,
 
-  reply,
-  push,
-  broadcast,
+  // game related
+  startGame,
+  addPlayer,
 }
 
 /**
@@ -20,13 +19,11 @@ export const gameModule = {
  * @param {string} params
  * @returns Channel
  */
-function channelNew(subtopic, screen_name) {
-  return socket.channel(`game:${subtopic}`, { screen_name })
+function channelNew(subtopic) {
+  return socket.channel(`game:${subtopic}`)
 }
 
-/**
- * @param {Channel} channel
- */
+/** @param {Channel} channel */
 function channelJoin(channel) {
   channel
     .join()
@@ -34,20 +31,19 @@ function channelJoin(channel) {
     .receive('error', () => console.log(`Unable to join "${channel.topic}"...`))
 }
 
-/**
- * @param {Channel} channel
- */
+/** @param {Channel} channel */
 function channelLeave(channel) {
   channel
     .leave()
-    .receive('ok', resp => console.log('Left channel!', resp))
-    .receive('error', resp => console.log('Unable to leave the channel...', resp))
+    .receive('ok', () => console.log(`Left "${channel.topic}"`))
+    .receive('error', () => console.log(`Unable to leave "${channel.topic}"...`))
 }
 
+/** @param {Channel} channel */
 function startGame(channel) {
   channel
     .push('start_game')
-    .receive('ok', response => console.log('Game started!', response))
+    .receive('ok', ({ player }) => console.log(`Game started for player: ${player}`))
     .receive('error', reason => {
       if (reason.includes(':already_started')) return console.log('Game resumed!')
 
@@ -57,27 +53,8 @@ function startGame(channel) {
 
 /**
  * @param {Channel} channel
- * @param {any} payload
+ * @param {string} name
  */
-function reply(channel, payload) {
-  channel
-    .push('reply', payload)
-    .receive('ok', response => console.log('reply: ', response))
-    .receive('error', error => console.error('Unable to echo to the channel', error))
-}
-
-/**
- * @param {Channel} channel
- * @param {any} payload
- */
-function push(channel, payload) {
-  channel.push('push', payload)
-}
-
-/**
- * @param {Channel} channel
- * @param {any} payload
- */
-function broadcast(channel, payload) {
-  channel.push('broadcast', payload)
+function addPlayer(channel, name) {
+  channel.push('add_player', name).receive('error', reason => console.error(`Unable to add a player: ${reason}`))
 }

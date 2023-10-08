@@ -41,9 +41,13 @@ window.gameModule = gameModule
 
 const searchParams = new URLSearchParams(location.search)
 const player = searchParams.get('player') || randomPlayer()
-const channel = gameModule.channelNew('lobby', player)
+const channel = gameModule.channelNew(player)
+
 gameModule.channelJoin(channel)
+channel.on('player_added', ({ message }) => console.log(message))
+
 gameModule.startGame(channel)
+gameModule.addPlayer(channel, randomPlayer())
 
 // gameModule.reply(channel, { reply: "reply" })
 // gameModule.reply(channel, { reply: "reply" })
@@ -55,5 +59,5 @@ gameModule.startGame(channel)
 // gameModule.broadcast(channel, { broadcast: "broadcast" })
 
 function randomPlayer() {
-  return `player-${(Date.now() + Math.random().toString(36)).split('.')[1]}`
+  return `${(Date.now() + Math.random().toString(36)).split('.')[1]}`
 }
