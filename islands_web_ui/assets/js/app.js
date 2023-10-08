@@ -16,26 +16,44 @@
 //
 
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
-import "phoenix_html"
+import 'phoenix_html'
 // Establish Phoenix Socket and LiveView configuration.
-import {Socket} from "phoenix"
-import {LiveSocket} from "phoenix_live_view"
-import topbar from "../vendor/topbar"
-
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+import { Channel, Socket } from 'phoenix'
+import { LiveSocket } from 'phoenix_live_view'
+import topbar from '../vendor/topbar'
+import { gameModule } from './game.module'
 
 // Show progress bar on live navigation and form submits
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
-window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
-window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+topbar.config({ barColors: { 0: '#29d' }, shadowColor: 'rgba(0, 0, 0, .3)' })
+window.addEventListener('phx:page-loading-start', _info => topbar.show(300))
+window.addEventListener('phx:page-loading-stop', _info => topbar.hide())
 
-// connect if there are any LiveViews on the page
+// liveSocket.enableDebug()
+// liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
+// liveSocket.disableLatencySim()
+const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute('content')
+window.liveSocket = new LiveSocket('/live', Socket, { params: { _csrf_token: csrfToken } })
 liveSocket.connect()
 
-// expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
-window.liveSocket = liveSocket
+// -- GAME
 
+window.gameModule = gameModule
+
+const searchParams = new URLSearchParams(location.search)
+const player = searchParams.get('player') || randomPlayer()
+const channel = gameModule.channelNew('lobby', player)
+gameModule.channelJoin(channel)
+gameModule.startGame(channel)
+
+// gameModule.reply(channel, { reply: "reply" })
+// gameModule.reply(channel, { reply: "reply" })
+
+// channel.on("push", response => console.log("push: ", response))
+// setTimeout(() => gameModule.push(channel, { push: "push" }), 2000)
+
+// channel.on("broadcast", response => console.log("broadcast: ", response))
+// gameModule.broadcast(channel, { broadcast: "broadcast" })
+
+function randomPlayer() {
+  return `player-${(Date.now() + Math.random().toString(36)).split('.')[1]}`
+}
