@@ -7,6 +7,7 @@ export const gameModule = {
   channelNew,
   channelJoin,
   channelLeave,
+  positionIsland,
 
   // game related
   startGame,
@@ -14,9 +15,7 @@ export const gameModule = {
 }
 
 /**
- * @param {Socket} socket
  * @param {string} subtopic
- * @param {string} params
  * @returns Channel
  */
 function channelNew(subtopic) {
@@ -28,7 +27,7 @@ function channelJoin(channel) {
   channel
     .join()
     .receive('ok', () => console.log(`Joined "${channel.topic}"`))
-    .receive('error', () => console.log(`Unable to join "${channel.topic}"...`))
+    .receive('error', error => console.error(`Error @ ${channelJoin.name}`, error))
 }
 
 /** @param {Channel} channel */
@@ -36,7 +35,7 @@ function channelLeave(channel) {
   channel
     .leave()
     .receive('ok', () => console.log(`Left "${channel.topic}"`))
-    .receive('error', () => console.log(`Unable to leave "${channel.topic}"...`))
+    .receive('error', error => console.error(`Error @ ${channelLeave.name}`, error))
 }
 
 /** @param {Channel} channel */
@@ -44,10 +43,10 @@ function startGame(channel) {
   channel
     .push('start_game')
     .receive('ok', ({ player }) => console.log(`Game started for player: ${player}`))
-    .receive('error', reason => {
-      if (reason.includes(':already_started')) return console.log('Game resumed!')
+    .receive('error', error => {
+      if (error.includes(':already_started')) return console.log('Game resumed!')
 
-      console.error(`Unable to start the game: ${reason}`)
+      console.error(`Error @ ${startGame.name}`, error)
     })
 }
 
@@ -56,5 +55,24 @@ function startGame(channel) {
  * @param {string} name
  */
 function addPlayer(channel, name) {
-  channel.push('add_player', name).receive('error', reason => console.error(`Unable to add a player: ${reason}`))
+  channel.push('add_player', name).receive('error', error => console.error(`Error @ ${addPlayer.name}`, error))
 }
+
+/**
+ * @param {Channel} channel
+ * @param {PositionIsland} payload
+ */
+function positionIsland(channel, payload) {
+  channel
+    .push('position_island', payload)
+    .receive('ok', response => console.log('Island positioned', response))
+    .receive('error', error => console.error(`Error @ ${positionIsland.name}`, error))
+}
+
+/**
+ * @typedef {Object} PositionIsland
+ * @property {string} player
+ * @property {string} shape
+ * @property {number} col
+ * @property {number} row
+ */

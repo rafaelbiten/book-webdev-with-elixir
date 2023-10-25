@@ -40,14 +40,27 @@ liveSocket.connect()
 window.gameModule = gameModule
 
 const searchParams = new URLSearchParams(location.search)
-const player = searchParams.get('player') || randomPlayer()
-const channel = gameModule.channelNew(player)
+const player = searchParams.get('player')
+const channel = gameModule.channelNew('islands')
 
 gameModule.channelJoin(channel)
-channel.on('player_added', ({ message }) => console.log(message))
+channel.on('player_added', ({ player }) => console.log('A second player joined the game:', player))
 
-gameModule.startGame(channel)
-gameModule.addPlayer(channel, randomPlayer())
+switch (player) {
+  case 'p1':
+    gameModule.startGame(channel)
+    setTimeout(() => {
+      gameModule.positionIsland(channel, { player: 'p1', shape: 'dot', col: 1, row: 1 })
+      gameModule.positionIsland(channel, { player: 'p1', shape: 'square', col: 2, row: 2 })
+    }, 5000) // give a few seconds for p2 to join the game
+    break
+
+  default:
+    gameModule.addPlayer(channel, 'p2')
+    gameModule.positionIsland(channel, { player: 'p2', shape: 'dot', col: 1, row: 1 })
+    gameModule.positionIsland(channel, { player: 'p2', shape: 'square', col: 2, row: 2 })
+    break
+}
 
 // gameModule.reply(channel, { reply: "reply" })
 // gameModule.reply(channel, { reply: "reply" })
@@ -58,6 +71,6 @@ gameModule.addPlayer(channel, randomPlayer())
 // channel.on("broadcast", response => console.log("broadcast: ", response))
 // gameModule.broadcast(channel, { broadcast: "broadcast" })
 
-function randomPlayer() {
-  return `${(Date.now() + Math.random().toString(36)).split('.')[1]}`
-}
+// function randomPlayer() {
+//   return `${(Date.now() + Math.random().toString(36)).split('.')[1]}`
+// }

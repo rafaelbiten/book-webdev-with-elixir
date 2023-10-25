@@ -10,7 +10,7 @@ defmodule IslandsEngine.Game do
   alias IslandsEngine.Rules
 
   @players [:p1, :p2]
-  @timeout :timer.minutes(5)
+  @timeout :timer.minutes(30)
 
   # client
 
