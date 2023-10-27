@@ -18,59 +18,59 @@
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import 'phoenix_html'
 // Establish Phoenix Socket and LiveView configuration.
-import { Channel, Socket } from 'phoenix'
+import { Socket } from 'phoenix'
 import { LiveSocket } from 'phoenix_live_view'
 import topbar from '../vendor/topbar'
 import { gameModule } from './game.module'
 
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: '#29d' }, shadowColor: 'rgba(0, 0, 0, .3)' })
-window.addEventListener('phx:page-loading-start', _info => topbar.show(300))
-window.addEventListener('phx:page-loading-stop', _info => topbar.hide())
+globalThis.addEventListener('phx:page-loading-start', _info => topbar.show(300))
+globalThis.addEventListener('phx:page-loading-stop', _info => topbar.hide())
 
 // liveSocket.enableDebug()
 // liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // liveSocket.disableLatencySim()
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute('content')
-window.liveSocket = new LiveSocket('/live', Socket, { params: { _csrf_token: csrfToken } })
+globalThis.liveSocket = new LiveSocket('/live', Socket, { params: { _csrf_token: csrfToken } })
 liveSocket.connect()
 
 // -- GAME
 
-window.gameModule = gameModule
-
-const searchParams = new URLSearchParams(location.search)
-const player = searchParams.get('player')
 const channel = gameModule.channelNew('islands')
-
 gameModule.channelJoin(channel)
-channel.on('player_added', ({ player }) => console.log('A second player joined the game:', player))
 
-switch (player) {
-  case 'p1':
-    gameModule.startGame(channel)
-    setTimeout(() => {
-      gameModule.positionIsland(channel, { player: 'p1', shape: 'dot', col: 1, row: 1 })
-      gameModule.positionIsland(channel, { player: 'p1', shape: 'square', col: 2, row: 2 })
-    }, 5000) // give a few seconds for p2 to join the game
-    break
+channel.on('player_added', ({ player }) => console.log('A player joined the game:', player))
+channel.on('islands_set', ({ player }) => console.log('A player finished setting its islands:', player))
 
-  default:
-    gameModule.addPlayer(channel, 'p2')
-    gameModule.positionIsland(channel, { player: 'p2', shape: 'dot', col: 1, row: 1 })
-    gameModule.positionIsland(channel, { player: 'p2', shape: 'square', col: 2, row: 2 })
-    break
+globalThis.p1 = createPlayer('p1')
+globalThis.p2 = createPlayer('p2')
+
+/**
+ * Leaving this example here as a reference of how an entire game would work.
+ * (Assuming that each player would join from a different browser session)
+ *
+ * From the browser console:
+ *
+ * p1.startGame()
+ * p2.joinGame()
+ * p1.positionIslands()
+ * p2.positionIslands()
+ * p1.setIslands()
+ * p2.setIslands()
+ */
+
+/**
+ * @property {string} player
+ */
+function createPlayer(player) {
+  return {
+    startGame: () => gameModule.startGame(channel, player),
+    joinGame: () => gameModule.addPlayer(channel, player),
+    positionIslands: () => {
+      gameModule.positionIsland(channel, { player, shape: 'dot', col: 1, row: 1 })
+      gameModule.positionIsland(channel, { player, shape: 'square', col: 2, row: 2 })
+    },
+    setIslands: () => gameModule.setIslands(channel, { player }),
+  }
 }
-
-// gameModule.reply(channel, { reply: "reply" })
-// gameModule.reply(channel, { reply: "reply" })
-
-// channel.on("push", response => console.log("push: ", response))
-// setTimeout(() => gameModule.push(channel, { push: "push" }), 2000)
-
-// channel.on("broadcast", response => console.log("broadcast: ", response))
-// gameModule.broadcast(channel, { broadcast: "broadcast" })
-
-// function randomPlayer() {
-//   return `${(Date.now() + Math.random().toString(36)).split('.')[1]}`
-// }
