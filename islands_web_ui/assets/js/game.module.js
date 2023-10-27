@@ -8,6 +8,7 @@ export const gameModule = {
   channelJoin,
   channelLeave,
   positionIsland,
+  setIslands,
 
   // game related
   startGame,
@@ -38,11 +39,14 @@ function channelLeave(channel) {
     .receive('error', error => console.error(`Error @ ${channelLeave.name}`, error))
 }
 
-/** @param {Channel} channel */
-function startGame(channel) {
+/**
+ * @param {Channel} channel
+ * @param {string} player
+ */
+function startGame(channel, player) {
   channel
     .push('start_game')
-    .receive('ok', ({ player }) => console.log(`Game started for player: ${player}`))
+    .receive('ok', () => console.log(`Game started for player: ${player}`))
     .receive('error', error => {
       if (error.includes(':already_started')) return console.log('Game resumed!')
 
@@ -52,10 +56,10 @@ function startGame(channel) {
 
 /**
  * @param {Channel} channel
- * @param {string} name
+ * @param {string} player
  */
-function addPlayer(channel, name) {
-  channel.push('add_player', name).receive('error', error => console.error(`Error @ ${addPlayer.name}`, error))
+function addPlayer(channel, player) {
+  channel.push('add_player', player).receive('error', error => console.error(`Error @ ${addPlayer.name}`, error))
 }
 
 /**
@@ -65,9 +69,22 @@ function addPlayer(channel, name) {
 function positionIsland(channel, payload) {
   channel
     .push('position_island', payload)
-    .receive('ok', response => console.log('Island positioned', response))
+    .receive('ok', () => console.log('Island positioned'))
     .receive('error', error => console.error(`Error @ ${positionIsland.name}`, error))
 }
+
+/**
+ * @param {Channel} channel
+ * @param {SetIslands} payload
+ */
+function setIslands(channel, payload) {
+  channel
+    .push('set_islands', payload)
+    .receive('ok', response => console.log('Islands set', response))
+    .receive('error', error => console.error(`Error @ ${setIslands.name}`, error))
+}
+
+// -- TYPES
 
 /**
  * @typedef {Object} PositionIsland
@@ -75,4 +92,9 @@ function positionIsland(channel, payload) {
  * @property {string} shape
  * @property {number} col
  * @property {number} row
+ */
+
+/**
+ * @typedef {Object} SetIslands
+ * @property {string} player
  */
