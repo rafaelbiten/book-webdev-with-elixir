@@ -48,6 +48,22 @@ defmodule IslandsWebUiWeb.GameChannel do
     end
   end
 
+  def handle_in("set_islands", payload, socket) do
+    game = via(socket.topic)
+    %{"player" => player} = payload
+
+    player = String.to_existing_atom(player)
+
+    case Game.set_islands(game, player) do
+      {:ok, board} ->
+        broadcast!(socket, "islands_set", %{player: player})
+        {:reply, {:ok, %{board: board}}, socket}
+
+      error ->
+        {:reply, to_error(error), socket}
+    end
+  end
+
   # --
 
   defp via("game:" <> player), do: GameSupervisor.find_game_by_name(player)
