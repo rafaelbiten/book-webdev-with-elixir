@@ -8,13 +8,10 @@ defmodule IslandsWebUi.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Telemetry supervisor
       IslandsWebUiWeb.Telemetry,
-      # Start the PubSub system
       {Phoenix.PubSub, name: IslandsWebUi.PubSub},
-      # Start Finch
+      IslandsWebUiWeb.Presence,
       {Finch, name: IslandsWebUi.Finch},
-      # Start the Endpoint (http/https)
       IslandsWebUiWeb.Endpoint
       # Start a worker by calling: IslandsWebUi.Worker.start_link(arg)
       # {IslandsWebUi.Worker, arg}
