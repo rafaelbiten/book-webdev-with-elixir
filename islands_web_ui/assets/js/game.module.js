@@ -9,6 +9,7 @@ export const gameModule = {
   channelLeave,
   positionIsland,
   setIslands,
+  guessCoordinate,
 
   // game related
   startGame,
@@ -84,6 +85,16 @@ function setIslands(channel, payload) {
     .receive('error', error => console.error(`Error @ ${setIslands.name}`, error))
 }
 
+/**
+ * @param {Channel} channel
+ * @param {GuessCoordinate} payload
+ */
+function guessCoordinate(channel, payload) {
+  channel
+    .push('guess_coordinate', payload)
+    .receive('error', error => console.error(`Error @ ${guessCoordinate.name}`, error))
+}
+
 // -- TYPES
 
 /**
@@ -97,4 +108,11 @@ function setIslands(channel, payload) {
 /**
  * @typedef {Object} SetIslands
  * @property {string} player
+ */
+
+/**
+ * @typedef {Object} GuessCoordinate
+ * @property {string} player
+ * @property {number} col
+ * @property {number} row
  */

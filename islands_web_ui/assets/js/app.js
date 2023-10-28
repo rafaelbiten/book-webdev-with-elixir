@@ -42,6 +42,11 @@ gameModule.channelJoin(channel)
 
 channel.on('player_added', ({ player }) => console.log('A player joined the game:', player))
 channel.on('islands_set', ({ player }) => console.log('A player finished setting its islands:', player))
+channel.on('coordinate_guessed', ({ player, ...results }) =>
+  results.won
+    ? console.log(`Player ${player} won the game!`)
+    : console.log(`Player ${player} guess results`, results)
+)
 
 globalThis.p1 = createPlayer('p1')
 globalThis.p2 = createPlayer('p2')
@@ -58,6 +63,17 @@ globalThis.p2 = createPlayer('p2')
  * p2.positionIslands()
  * p1.setIslands()
  * p2.setIslands()
+ * p1.guessCoordinate({ row: 1, col: 1 })
+ * p2.guessCoordinate({ row: 1, col: 2 })
+ * ...
+ * p1.guessCoordinate({ row: 2, col: 2 })
+ * p1.guessCoordinate({ row: 2, col: 3 })
+ * p1.guessCoordinate({ row: 3, col: 2 })
+ * p1.guessCoordinate({ row: 3, col: 3 })
+ *
+ * To get the game state:
+ * pid = GameSupervisor.find_game_by_name("islands")
+ * Game.get_state pid
  */
 
 /**
@@ -72,5 +88,6 @@ function createPlayer(player) {
       gameModule.positionIsland(channel, { player, shape: 'square', col: 2, row: 2 })
     },
     setIslands: () => gameModule.setIslands(channel, { player }),
+    guessCoordinate: ({ row, col }) => gameModule.guessCoordinate(channel, { player, row, col }),
   }
 }

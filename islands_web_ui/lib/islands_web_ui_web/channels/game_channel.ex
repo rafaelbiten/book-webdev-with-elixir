@@ -64,6 +64,28 @@ defmodule IslandsWebUiWeb.GameChannel do
     end
   end
 
+  def handle_in("guess_coordinate", payload, socket) do
+    game = via(socket.topic)
+    %{"player" => player, "col" => col, "row" => row} = payload
+
+    player = String.to_existing_atom(player)
+
+    case Game.guess(game, player, col, row) do
+      {:ok, {:hit, island, won}} ->
+        result = %{hit: true, island: island, won: won}
+        broadcast!(socket, "coordinate_guessed", Map.merge(payload, result))
+        {:noreply, socket}
+
+      {:ok, {:miss, island, _won}} ->
+        result = %{hit: false, island: island, won: false}
+        broadcast!(socket, "coordinate_guessed", Map.merge(payload, result))
+        {:noreply, socket}
+
+      error ->
+        {:reply, to_error(error), socket}
+    end
+  end
+
   # --
 
   defp via("game:" <> player), do: GameSupervisor.find_game_by_name(player)
