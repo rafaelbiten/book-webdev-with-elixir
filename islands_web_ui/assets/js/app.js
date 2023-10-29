@@ -36,13 +36,23 @@ globalThis.liveSocket = new LiveSocket('/live', Socket, { params: { _csrf_token:
 liveSocket.connect()
 
 /**
+ * TODO:
+ * 1. Refactor to remove hardcoded 'islands' on gameModule.channelNew('islands', ...)
+ * 2. Consider adding a simple UI to the game
+ * 3. Consider adding an invitation system
+ *    - a player starts a game channel with a game
+ *    - an invitation code is generated and displayed on the screen
+ *    - a second player can join that game with the invitation code
+ */
+
+/**
  * Leaving this example here as a reference of how an entire game would work.
  * (Assuming that each player would join from a different browser session)
  *
- * const p1 = createPlayer('p1', 'Raf')
- *    const p2 = createPlayer('p2', 'Fau')
- * p1.startGame()
- *    p2.joinGame()
+ * const p1 = createPlayer('p1', 'Raf') // p1 is created and joins the game channel
+ *    const p2 = createPlayer('p2', 'Fau') // p2 is created and joins the game channel
+ * p1.startGame() // p1 starts the game
+ *    p2.joinGame() // p2 joins p1's game
  * p1.positionIslands()
  *    p2.positionIslands()
  *    p2.positionIslands()
@@ -57,9 +67,11 @@ liveSocket.connect()
  * p1.guessCoordinate({ row: 3, col: 2 })
  *    p2.guessCoordinate(...)
  * p1.guessCoordinate({ row: 3, col: 3 })
+ * 
+ * ...
  *
  * To get the game state:
- * 
+ *
  * pid = GameSupervisor.find_game_by_name("islands")
  * Game.get_state pid
  */
