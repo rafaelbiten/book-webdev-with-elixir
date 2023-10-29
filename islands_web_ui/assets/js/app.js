@@ -35,51 +35,50 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 globalThis.liveSocket = new LiveSocket('/live', Socket, { params: { _csrf_token: csrfToken } })
 liveSocket.connect()
 
-// -- GAME
-
-const channel = gameModule.channelNew('islands')
-gameModule.channelJoin(channel)
-
-channel.on('player_added', ({ player }) => console.log('A player joined the game:', player))
-channel.on('islands_set', ({ player }) => console.log('A player finished setting its islands:', player))
-channel.on('coordinate_guessed', ({ player, ...results }) =>
-  results.won
-    ? console.log(`Player ${player} won the game!`)
-    : console.log(`Player ${player} guess results`, results)
-)
-
-globalThis.p1 = createPlayer('p1')
-globalThis.p2 = createPlayer('p2')
-
 /**
  * Leaving this example here as a reference of how an entire game would work.
  * (Assuming that each player would join from a different browser session)
  *
- * From the browser console:
- *
+ * const p1 = createPlayer('p1', 'Raf')
+ *    const p2 = createPlayer('p2', 'Fau')
  * p1.startGame()
- * p2.joinGame()
+ *    p2.joinGame()
  * p1.positionIslands()
- * p2.positionIslands()
+ *    p2.positionIslands()
+ *    p2.positionIslands()
  * p1.setIslands()
- * p2.setIslands()
+ *    p2.setIslands()
  * p1.guessCoordinate({ row: 1, col: 1 })
- * p2.guessCoordinate({ row: 1, col: 2 })
- * ...
+ *    p2.guessCoordinate({ row: 1, col: 2 })
  * p1.guessCoordinate({ row: 2, col: 2 })
+ *    p2.guessCoordinate(...)
  * p1.guessCoordinate({ row: 2, col: 3 })
+ *    p2.guessCoordinate(...)
  * p1.guessCoordinate({ row: 3, col: 2 })
+ *    p2.guessCoordinate(...)
  * p1.guessCoordinate({ row: 3, col: 3 })
  *
  * To get the game state:
+ * 
  * pid = GameSupervisor.find_game_by_name("islands")
  * Game.get_state pid
  */
 
 /**
  * @property {string} player
+ * @property {string} displayName
  */
-function createPlayer(player) {
+globalThis.createPlayer = (player, displayName) => {
+  const channel = gameModule.channelNew('islands', displayName)
+  gameModule.channelJoin(channel)
+
+  channel.on('subscribers', players => console.log('Present players: ', players))
+  channel.on('player_added', ({ player }) => console.log('A player joined the game:', player))
+  channel.on('islands_set', ({ player }) => console.log('A player finished setting its islands:', player))
+  channel.on('coordinate_guessed', ({ player, ...results }) =>
+    results.won ? console.log(`Player ${player} won the game!`) : console.log(`Player ${player} guess results`, results)
+  )
+
   return {
     startGame: () => gameModule.startGame(channel, player),
     joinGame: () => gameModule.addPlayer(channel, player),
@@ -89,5 +88,6 @@ function createPlayer(player) {
     },
     setIslands: () => gameModule.setIslands(channel, { player }),
     guessCoordinate: ({ row, col }) => gameModule.guessCoordinate(channel, { player, row, col }),
+    showPlayers: () => gameModule.showPlayers(channel),
   }
 }

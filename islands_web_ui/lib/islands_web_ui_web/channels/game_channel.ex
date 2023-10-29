@@ -1,11 +1,25 @@
 defmodule IslandsWebUiWeb.GameChannel do
-  use IslandsWebUiWeb, :channel
-
   alias IslandsEngine.Game
   alias IslandsEngine.GameSupervisor
+  alias IslandsWebUiWeb.Presence
 
-  def join("game:" <> _player, _payload, socket) do
+  use IslandsWebUiWeb, :channel
+
+  def join("game:" <> _player, %{"display_name" => display_name}, socket) do
+    send(self(), {:after_join, display_name})
     {:ok, socket}
+  end
+
+  def handle_info({:after_join, display_name}, socket) do
+    {:ok, _} =
+      Presence.track(socket, display_name, %{online_at: inspect(System.system_time(:second))})
+
+    {:noreply, socket}
+  end
+
+  def handle_in("show_subscribers", _payload, socket) do
+    broadcast!(socket, "subscribers", Presence.list(socket))
+    {:noreply, socket}
   end
 
   def handle_in("start_game", _payload, socket) do

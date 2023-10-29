@@ -7,21 +7,22 @@ export const gameModule = {
   channelNew,
   channelJoin,
   channelLeave,
+
+  startGame,
+  addPlayer,
   positionIsland,
   setIslands,
   guessCoordinate,
-
-  // game related
-  startGame,
-  addPlayer,
+  showPlayers,
 }
 
 /**
  * @param {string} subtopic
+ * @param {string} display_name
  * @returns Channel
  */
-function channelNew(subtopic) {
-  return socket.channel(`game:${subtopic}`)
+function channelNew(subtopic, display_name) {
+  return socket.channel(`game:${subtopic}`, { display_name })
 }
 
 /** @param {Channel} channel */
@@ -93,6 +94,13 @@ function guessCoordinate(channel, payload) {
   channel
     .push('guess_coordinate', payload)
     .receive('error', error => console.error(`Error @ ${guessCoordinate.name}`, error))
+}
+
+/**
+ * @param {Channel} channel
+ */
+function showPlayers(channel) {
+  channel.push('show_subscribers').receive('error', error => console.error(`Error @ ${showPlayers.name}`, error))
 }
 
 // -- TYPES
