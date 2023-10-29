@@ -13,7 +13,7 @@ export const gameModule = {
   positionIsland,
   setIslands,
   guessCoordinate,
-  showPlayers,
+  listPlayers,
 }
 
 /**
@@ -30,7 +30,10 @@ function channelJoin(channel) {
   channel
     .join()
     .receive('ok', () => console.log(`Joined "${channel.topic}"`))
-    .receive('error', error => console.error(`Error @ ${channelJoin.name}`, error))
+    .receive('error', error => {
+      console.error(`Error @ ${channelJoin.name}`, error)
+      channel.leave()
+    })
 }
 
 /** @param {Channel} channel */
@@ -99,8 +102,8 @@ function guessCoordinate(channel, payload) {
 /**
  * @param {Channel} channel
  */
-function showPlayers(channel) {
-  channel.push('show_subscribers').receive('error', error => console.error(`Error @ ${showPlayers.name}`, error))
+function listPlayers(channel) {
+  channel.push('show_subscribers').receive('error', error => console.error(`Error @ ${listPlayers.name}`, error))
 }
 
 // -- TYPES

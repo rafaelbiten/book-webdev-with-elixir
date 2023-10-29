@@ -6,8 +6,17 @@ defmodule IslandsWebUiWeb.GameChannel do
   use IslandsWebUiWeb, :channel
 
   def join("game:" <> _player, %{"display_name" => display_name}, socket) do
-    send(self(), {:after_join, display_name})
-    {:ok, socket}
+    cond do
+      players_count(socket) == 2 ->
+        {:error, %{reason: "Two players already playing this game"}}
+
+      is_playing?(socket, display_name) ->
+        {:error, %{reason: "A player #{display_name} is already playing this game"}}
+
+      true ->
+        send(self(), {:after_join, display_name})
+        {:ok, socket}
+    end
   end
 
   def handle_info({:after_join, display_name}, socket) do
@@ -103,6 +112,20 @@ defmodule IslandsWebUiWeb.GameChannel do
   # --
 
   defp via("game:" <> player), do: GameSupervisor.find_game_by_name(player)
+
   defp to_error({:error, reason}), do: {:error, inspect(reason)}
   defp to_error(error), do: {:error, inspect(error)}
+
+  defp players_count(socket) do
+    socket
+    |> Presence.list()
+    |> Map.keys()
+    |> length()
+  end
+
+  defp is_playing?(socket, display_name) do
+    socket
+    |> Presence.list()
+    |> Map.has_key?(display_name)
+  end
 end

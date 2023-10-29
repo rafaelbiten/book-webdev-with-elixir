@@ -88,6 +88,6 @@ globalThis.createPlayer = (player, displayName) => {
     },
     setIslands: () => gameModule.setIslands(channel, { player }),
     guessCoordinate: ({ row, col }) => gameModule.guessCoordinate(channel, { player, row, col }),
-    showPlayers: () => gameModule.showPlayers(channel),
+    listPlayers: () => gameModule.listPlayers(channel),
   }
 }
